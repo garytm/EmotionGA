@@ -7,6 +7,8 @@ public class Agents : MonoBehaviour
     public int popSize = 100;
     public GameObject ground;
     protected List<Agent> agents = new List<Agent>();
+    public List<Agent> happyAgents = new List<Agent>();
+  
     void Start()
     {
         Bounds boundary = ground.GetComponent<Renderer>().bounds;
@@ -16,6 +18,10 @@ public class Agents : MonoBehaviour
             agents.Add(agent);
         }
         StartCoroutine(EvalLoop());
+    }
+    void Update()
+    {
+       
     }
 
     public Agent SpawnAgent(Bounds bounds)
@@ -27,13 +33,10 @@ public class Agents : MonoBehaviour
         float agentHeight = tmpAgent.GetComponent<MeshFilter>().mesh.bounds.size.y;
         worldPos.y += agentHeight / 2.0f;
         tmpAgent.transform.position = worldPos;
-        AssignColour(tmpAgent);
+       
         return agent;
     }
-    public void AssignColour(GameObject agent)
-    {
-        agent.GetComponent<Agent>().SetColor(new Color(UnityEngine.Random.Range(0.0f, 1.0f), UnityEngine.Random.Range(0.0f, 1.0f), UnityEngine.Random.Range(0.0f, 1.0f)));
-    }
+   
     float EvalFitness(Color ground, Color agent)
     {
         float fitness = (new Vector3(ground.r, ground.g, ground.b) - new Vector3(agent.r,agent.g,agent.b)).magnitude;
@@ -88,6 +91,7 @@ public class Agents : MonoBehaviour
                 childAgent1.SetColor(tempColour);
 
                 tempColour = new Color(agents[parent2Index].color.r, agents[parent2Index].color.g, agents[parent1Index].color.b);
+                tempColour = EvalMutation(tempColour);
                 childAgent2.SetColor(tempColour);
             }
 
@@ -97,6 +101,7 @@ public class Agents : MonoBehaviour
                 childAgent1.SetColor(tempColour);
 
                 tempColour = new Color(agents[parent2Index].color.r, agents[parent1Index].color.g, agents[parent2Index].color.b);
+                tempColour = EvalMutation(tempColour);
                 childAgent2.SetColor(tempColour);
             }
 
@@ -106,6 +111,7 @@ public class Agents : MonoBehaviour
                 childAgent1.SetColor(tempColour);
 
                 tempColour = new Color(agents[parent2Index].color.r, agents[parent1Index].color.g, agents[parent1Index].color.b);
+                tempColour = EvalMutation(tempColour);
                 childAgent2.SetColor(tempColour);
             }
 
@@ -115,6 +121,7 @@ public class Agents : MonoBehaviour
                 childAgent1.SetColor(tempColour);
 
                 tempColour = new Color(agents[parent1Index].color.r, agents[parent2Index].color.g, agents[parent1Index].color.b);
+                tempColour = EvalMutation(tempColour);
                 childAgent2.SetColor(tempColour);
             }
 
@@ -124,6 +131,7 @@ public class Agents : MonoBehaviour
                 childAgent1.SetColor(tempColour);
 
                 tempColour = new Color(agents[parent1Index].color.r, agents[parent1Index].color.g, agents[parent2Index].color.b);
+                tempColour = EvalMutation(tempColour);
                 childAgent2.SetColor(tempColour);
             }
             else
@@ -132,17 +140,32 @@ public class Agents : MonoBehaviour
                 childAgent1.SetColor(tempColour);
 
                 tempColour = new Color(agents[parent1Index].color.r, agents[parent2Index].color.g, agents[parent1Index].color.b);
+                tempColour = EvalMutation(tempColour);
                 childAgent2.SetColor(tempColour);
             }
         }
         agents.AddRange(tempAgents);
     }
+    public Color EvalMutation(Color agent)
+    {
+        float mutationRate = 0.1f;
+        Vector3 mutationColour = new Vector3(agent.r, agent.g, agent.b);
+        for(int i = 0; i < 3; i++)
+        {
+            if (UnityEngine.Random.Range(0.0f, 1.0f) <= mutationRate)
+            {
+                mutationColour[i] = UnityEngine.Random.Range(0.0f, 1.0f);
+            }
+        }
+        return new Color(mutationColour.x,mutationColour.y,mutationColour.z);
+    }
     IEnumerator EvalLoop()
     {
         while(true)
         {
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(2.0f);
             EvalPopulation();
         }
     }
+   
 }
